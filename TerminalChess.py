@@ -72,7 +72,7 @@ def initialize():
     global white_turn
     
     #Initializes standard chess piece layout
-    piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,fs,fs,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
+    piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
              [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs], [bp1,bp2,bp3,bp4,bp5,bp6,bp7,bp8], [br1,bn1,bb1,bq,bk,bb2,bn2,br2]]
 
     #Initializes starting turn as white
@@ -296,6 +296,15 @@ def moveCheck(target_piece, target_square):
         else:
             return True    
 
+    #KING
+    if target_piece[:2] == turn_initial + "K":                            #Check Move for King
+        valid = kingMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, turn_initial, False)
+        if not valid:
+            print("Invalid Move for King")
+            return False
+        else:
+            return True
+
 def rookMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):                               #ROOK ROOK 
     counter = 0                         #Counter for checking each square before reaching target square
 
@@ -453,6 +462,15 @@ def queenMoveCheck(position_x, position_y, target_x, target_y, turn_initial, che
         elif abs(position_x - target_x) > 0 and abs(position_y - target_y) > 0:
             return False
         
+    return True
+
+def kingMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
+
+    if abs(position_x - target_x) > 1 or abs(position_x-target_y) > 1:      #If moving more than one square
+        return False
+    if piece[targetY][targetX][0] == turn:                                  #If encounter ally piece, invalid move
+        if not checking_for_blocks:
+            return False
     return True
 
 while True:
