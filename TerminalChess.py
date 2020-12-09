@@ -61,22 +61,19 @@ bp7 = "bP7"
 bp8 = "bP8"
 fs = "   "
 
-#Initializes Board
-piece = []
 
-#Initialize Game State
-state = 0
-
-#Initialize Turn
-white_turn = True
+piece = []                      #Initializes Board
+state = 0                       #Initialize Game State
+white_turn = True               #Initialize Turn
+check_square_list = [[],[],[]]  #Initialize List that records the squares that block the opposing king
 
 def initialize():
     global piece
     global white_turn
     
     #Initializes standard chess piece layout
-    piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
-             [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs], [bp1,bp2,bp3,bp4,bp5,bp6,bp7,bp8], [br1,bn1,bb1,bq,bk,bb2,bn2,br2]]
+    piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [fs,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
+             [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,bp2,bp3,bp4,bp5,bp6,bp7,bp8], [br1,bn1,bb1,bq,bk,bb2,bn2,br2]]
 
     #Initializes starting turn as white
     white_turn = True
@@ -144,12 +141,15 @@ def printBoard():           #Prints the ASCII graphics for the Board and the Pie
     print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
 
 def gameUpdate():               #Runs the logic for the game
+    valid_move = False
     printBoard()
-    player_input = playerInput()
-    target_piece = player_input[0]
-    target_square = player_input[1]
-    
 
+    while not valid_move:       #Keep Asking for moves until the move is valid
+        player_input = playerInput()
+        target_piece = player_input[0]
+        target_square = player_input[1]
+        valid_move = moveCheck(target_piece, target_square)
+    
 def update():                   #Where all the code is organized
     global state
     
@@ -165,6 +165,7 @@ def update():                   #Where all the code is organized
 
 def playerInput():
     global state                #Declare global for going back to the main menu
+    
     piece_exists = False        
     square_exists = False
 
@@ -238,8 +239,70 @@ def squareCoordinateTranslate(square):      #Translates letter to number and ret
     elif square[0] == "H":
         return "7" + square[1]
 
-def moveCheck(target_piece, target_square, white_turn):
-    print()
+def recordSquare(x, y):
+    global check_square_list
+    
+    check_square_list.append([x, y])  
+
+def moveCheck(target_piece, target_square):
+
+    if white_turn:
+        turn_initial = "w"
+    else:
+        turn_initial = "b"
+    
+    #Get the coordinates of the target piece
+    target_piece_coordinate = getPieceCoordinate(target_piece)
+    target_piece_x = target_piece_coordinate[0]
+    target_piece_y = target_piece_coordinate[1]
+
+    #Get the coordinates of the target square
+    target_square_x = int(target_square[0])
+    target_square_y = int(target_square[1]) - 1
+        
+    #ROOK
+    if target_piece == turn_initial + "R1" or target_piece == turn_initial + "R2" or target_piece == turn_initial + "R3" or target_piece == turn_initial + "R4" or target_initial == turn_initial + "R5":        #Check move for Rook
+        valid_move = rookMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, turn_initial, False)
+        if not valid_move:
+            print("Invalid Move for Rook")
+            return False
+        else:
+            return True
+
+def rookMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
+    counter = 0                         #Counter for checking each square before reaching target square
+
+    if piece[target_y][target_x][0] == turn_initial and piece[target_y][target_x][1:] != "K1":  #Checks for an ally piece obstructing at the target square. Useful for checks
+        if not checking_for_blocks:                                                             #The target square is obstructed only if we are not checking for squares that can block the enemy king
+            return False
+    
+    if position_x > target_x:
+        while counter < abs(position_x-target_x)-1:                   #Check squares to the left   <------
+            counter += 1
+            check_square_list.append([position_x-counter, position_y])
+            if piece[position_y][position_x-counter] != "   " and piece[position_y][position_x-counter][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+    elif position_x < target_x:
+        while counter < abs(target_x-position_x)-1:                   #Check squares to the right  ------->
+            counter += 1
+            check_square_list.append([position_x+counter, position_y])
+            if piece[position_y][position_x+counter] != "   " and piece[position_y][position_x+counter][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+    elif position_y > target_y:                                                                    
+        while counter < abs(position_y-target_y)-1:                   #Check squares below       |||||
+            counter += 1                                                                        #VVVVV
+            check_square_list.append([position_y, position_y-counter])
+            if piece[position_y-counter][position_x] != "   " and piece[position_y-counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+    elif position_y < target_y:                                                                #^^^^^
+        while counter < abs(target_y-position_y)-1:                   #Check squares above      |||||
+            counter += 1                                                                    
+            check_square_list.append([position_y, position_y+counter])
+            if piece[position_y+counter][position_y] != "   " and piece[position_y+counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+
+    return True
+    
     
 while True:
     update()                    #Runs the Game 
