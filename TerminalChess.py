@@ -297,10 +297,18 @@ def moveCheck(target_piece, target_square):
             return True    
 
     #KING
-    if target_piece[:2] == turn_initial + "K":                            #Check Move for King
+    if target_piece[:2] == turn_initial + "K":      #Check Move for King
         valid = kingMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, turn_initial, False)
         if not valid:
             print("Invalid Move for King")
+            return False
+        else:
+            return True
+    #Pawn                                           #Check Move for Pawn
+    if target_piece[:2] == turn_initial + "P": 
+        valid = pawnMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, turn_initial, False)
+        if not valid:
+            print("Invalid Move for Pawn")
             return False
         else:
             return True
@@ -473,6 +481,27 @@ def kingMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
             return False
     return True
 
+def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
+    if piece[target_y][target_x][0] == turn_initial and piece[target_y][target_x][1:] != "K1" : #Checks for an ally piece obstructing at the target square. Useful for checks
+        if not checking_for_blocks:                                                             #The target square is obstructed only if we are not checking for squares that can block the enemy king
+            return False
+        
+    if abs(position_y-target_y) == 1 and abs(position_x-target_x) == 1:   #Allows diagonal movement to capture opposing piece
+        if piece[target_y][target_x][0] == turn_initial:
+            return True
+
+    if abs(position_y - target_y) > 1:                                  #Prevent pawn from moving more than one square
+        return False
+
+    if not white_turn and position_y-target_y < 0:                          #Prevent pawn from moving in reverse
+        return False
+    elif white_turn and position_y-target_y > 0:
+        return False
+    
+    if position_x-target_x != 0:                                        #Prevent pawn from moving horizontally
+        return False
+
+    return True
 while True:
     update()                    #Runs the Game 
     
