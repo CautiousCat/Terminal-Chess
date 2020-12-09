@@ -146,10 +146,16 @@ def gameUpdate():               #Runs the logic for the game
 
     while not valid_move:       #Keep Asking for moves until the move is valid
         player_input = playerInput()
+        if state == 0:
+            break
+        
         target_piece = player_input[0]
         target_square = player_input[1]
         valid_move = moveCheck(target_piece, target_square)
-    
+
+    if state != 0:
+        updatePieces(target_piece, target_square)
+
 def update():                   #Where all the code is organized
     global state
     
@@ -500,8 +506,19 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     
     if position_x-target_x != 0:                                        #Prevent pawn from moving horizontally
         return False
-
     return True
+
+def updatePieces(target_piece, target_square):
+    #Get Coordinates for the piece to move and target square
+    coordinate = getPieceCoordinate(target_piece)
+    position_x = coordinate[0]
+    position_y = coordinate[1]
+    target_x = int(target_square[0])
+    target_y = int(target_square[1])-1
+    
+    piece[target_y][target_x] = target_piece    #Place piece on the target square
+    piece[position_y][position_x] = fs          #Free space on previous square
+
 while True:
     update()                    #Runs the Game 
     
