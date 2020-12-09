@@ -501,6 +501,13 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
         if piece[target_y][target_x][0] == turn_initial:
             return True
 
+    if white_turn:
+        if position_y == 1 and target_y == 3:
+            return True
+    else:
+        if position_y == 6 and target_y == 4:
+            return True
+    
     if abs(position_y - target_y) > 1:                                  #Prevent pawn from moving more than one square
         return False
 
