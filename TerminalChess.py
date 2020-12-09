@@ -155,6 +155,7 @@ def gameUpdate():               #Runs the logic for the game
 
     if state != 0:
         updatePieces(target_piece, target_square)
+        changeTurn()
 
 def update():                   #Where all the code is organized
     global state
@@ -176,6 +177,10 @@ def playerInput():
     square_exists = False
 
     while not piece_exists or not square_exists:        #Keep asking for inputs until both the target piece and the target square exist on the board
+        if white_turn:
+            print("White's Turn")
+        else:
+            print("Black's Turn")
         player_input = input("Move: ")          
         player_input = player_input.upper()
 
@@ -518,6 +523,13 @@ def updatePieces(target_piece, target_square):
     
     piece[target_y][target_x] = target_piece    #Place piece on the target square
     piece[position_y][position_x] = fs          #Free space on previous square
+
+def changeTurn():
+    global white_turn
+    if white_turn:
+        white_turn = False
+    else:
+        white_turn = True
 
 while True:
     update()                    #Runs the Game 
