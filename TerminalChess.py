@@ -72,8 +72,8 @@ def initialize():
     global white_turn
     
     #Initializes standard chess piece layout
-    piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [fs,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
-             [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,bp2,bp3,bp4,bp5,bp6,bp7,bp8], [br1,bn1,bb1,bq,bk,bb2,bn2,br2]]
+    piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
+             [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs], [bp1,bp2,bp3,bp4,bp5,bp6,bp7,bp8], [br1,bn1,bb1,bq,bk,bb2,bn2,br2]]
 
     #Initializes starting turn as white
     white_turn = True
@@ -261,15 +261,24 @@ def moveCheck(target_piece, target_square):
     target_square_y = int(target_square[1]) - 1
         
     #ROOK
-    if target_piece == turn_initial + "R1" or target_piece == turn_initial + "R2" or target_piece == turn_initial + "R3" or target_piece == turn_initial + "R4" or target_initial == turn_initial + "R5":        #Check move for Rook
+    if target_piece[:2] == turn_initial + "R":        #Checks move for Rook
         valid_move = rookMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, turn_initial, False)
         if not valid_move:
             print("Invalid Move for Rook")
             return False
         else:
             return True
+        
+    #KNIGHT            
+    if target_piece[:2] == turn_initial + "N":        #Check move for Knight
+        valid = knightMove(target_piece_x, target_piece_y, target_square_x, target_square_y, turn_initial, False)
+        if not valid:
+            print("Invalid Move for Knight")
+            return False
+        else:
+            return True
 
-def rookMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
+def rookMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):                               #ROOK ROOK ROOK ROOK ROOK ROOK
     counter = 0                         #Counter for checking each square before reaching target square
 
     if piece[target_y][target_x][0] == turn_initial and piece[target_y][target_x][1:] != "K1":  #Checks for an ally piece obstructing at the target square. Useful for checks
@@ -300,9 +309,23 @@ def rookMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
             check_square_list.append([position_y, position_y+counter])
             if piece[position_y+counter][position_y] != "   " and piece[position_y+counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
                 return False
-
     return True
-    
+
+def knightMove(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
+    y_move = abs(position_y - target_y)                  
+    x_move = abs(position_x - target_x)
+
+    if y_move < 1 or y_move > 2:                    #Check the target square is within 2 squares along the file
+        return False
+    if x_move < 1 or x_move > 2:                   #Check the target square is within 2 squares along the rank
+        return False
+    if y_move == x_move:                            #Check the target square allows an L movement
+        return False
+        
+    if piece[target_y][target_x][0] == turn_initial and piece[target_y][target_x][1:] != "K1":  #Checks for an ally piece obstructing at the target square. Useful for checks
+        if not checking_for_blocks:                                                     #The target square is obstructed only if we are not checking for squares that can block the enemy king
+            return False
+    return True
     
 while True:
     update()                    #Runs the Game 
