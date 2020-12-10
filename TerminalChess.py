@@ -87,6 +87,11 @@ can_castle_white_long = False
 can_castle_black_short = False
 can_castle_black_long = False
 
+#Pawn Promotion
+pawn_to_promote = ""
+white_promotion_number = 3
+black_promotion_number = 3
+
 def initialize():
     global piece
     global white_turn
@@ -100,6 +105,9 @@ def initialize():
     global can_castle_white_long
     global can_castle_black_short
     global can_castle_black_long
+    global pawn_to_promote
+    global white_promotion_number
+    global black_promotion_number
     
     #Initializes standard chess piece layout
     piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
@@ -108,7 +116,7 @@ def initialize():
     #Initializes starting turn as white
     white_turn = True
 
-    #Initializes Castling Componenet
+    #Initializes Castling Components
     has_bR1_moved = False
     has_bR2_moved = False
     has_wR1_moved = False
@@ -119,9 +127,18 @@ def initialize():
     can_castle_white_long = False
     can_castle_black_short = False
     can_castle_black_long = False
+
+    #Initializes Pawn Promotion Components
+    pawn_to_promote = ""
+    white_promotion_number = 3
+    black_promoton_number = 3
     
 
-def mainMenu():             #The main menu for the Game 
+def mainMenu():             #The main menu for the Game
+    print("                                                                                     ")
+    print("A seemingly functional chess game by Dave Angelo D. Jimenez                          ")
+    print("                                                                                     ")
+    print("                                                                                     ")
     print("          CCCC         HHHH     HHHH    EEEEEEEEEEEEE       SSSSSS          SSSSSS   ")
     print("         CCCCCCC       HHHH     HHHH    EEEEEEEEEEEEE      SSSSSSSS        SSSSSSSS  ")
     print("       CCCC   CCCC     HHHH     HHHH    EEEE             SSSSS    SSS    SSSSS    SSS")
@@ -133,8 +150,7 @@ def mainMenu():             #The main menu for the Game
     print("          CCCC         HHHH     HHHH    EEEEEEEEEEEEE       SSSSS           SSSSS    ")
     print("                                                                                     ")
     print("How to Play: To move a piece type in this format [(piece initial) + (number) + (file) + (rank)]")
-    print("Example:")
-    print("(Move: p5e4) to move p5 pawn to the e4 square\n")
+    print("Example: (Move: p5e4) to move p5 pawn to the e4 square\n")
     print("Type '1' to Start a New Game")
     print("Type '2' to Load last Game")
     print("Type '3' to view Most Wins")
@@ -187,6 +203,7 @@ def printBoard():           #Prints the ASCII graphics for the Board and the Pie
     print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
 
 def gameUpdate():               #Runs the logic for the game
+    global state
     global check_square_list
     global checking_piece
     checking_piece = ""
@@ -195,22 +212,27 @@ def gameUpdate():               #Runs the logic for the game
     checked = isChecked()
     
     if checked:
-        checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker())              
-
-    printBoard()
-
-    while not valid_move:       #Keep Asking for moves until the move is valid
-        player_input = playerInput()
-        if state == 0:
-            break
-        
-        target_piece = player_input[0]
-        target_square = player_input[1]
-        valid_move = moveCheck(target_piece, target_square)
+        if checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker())   :           
+            state = 0
+            input("Enter to go back to Main Menu")
 
     if state != 0:
-        updatePieces(target_piece, target_square)
-        changeTurn()
+        printBoard()
+
+        while not valid_move:       #Keep Asking for moves until the move is valid
+            player_input = playerInput()
+            if state == 0:
+                break
+            
+            target_piece = player_input[0]
+            target_square = player_input[1]
+            valid_move = moveCheck(target_piece, target_square)
+        
+        if state != 0:
+            updatePieces(target_piece, target_square)
+            if canPromotePawn():
+                promotePawn()
+            changeTurn()
 
 def update():                   #Where all the code is organized
     global state
@@ -599,8 +621,9 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
         if piece[target_y][target_x][0] == turn_initial:                                        #Checks for an ally piece obstructing at the target square. Useful for checks
             if not checking_for_blocks:                                                         #The target square is obstructed only if we are not checking for squares that can block the enemy king
                 return False
-        if (piece[target_y][target_x][0] != turn_initial and piece[target_y][target_x][0] != " ") or (target_x == ep_square[0] and target_y == ep_square[1] and can_ep):     #Enables capture if En Pasant
-            ep_capture = True
+        if piece[target_y][target_x][0] != turn_initial and piece[target_y][target_x][0] != " ":
+            if target_x == ep_square[0] and target_y == ep_square[1] and can_ep:     #Enables capture if En Pasant
+                ep_capture = True
             return True
 
     if piece[target_y][target_x] != "   ":                                        #Checks for any piece obstructing at the target square.                                                        
@@ -608,16 +631,20 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     
     if turn_initial == "w":                                                      #Allows 2 squares on first move
         if position_y == 1 and target_y == 3:
-            ep_square = [position_x, 2]                                 #Prepare En Passant
+            if piece[target_y-1][target_x] != "   ":                                        #Checks for any piece obstructing before target square.                                                        
+                return False             
+            ep_square = [position_x, 2]                                         #Prepare En Passant
             can_ep = True
             return True
     else:
         if position_y == 6 and target_y == 4:
+            if piece[target_y+1][target_x] != "   ":                                        #Checks for any piece obstructing before the target square.                                                        
+                return False 
             ep_square = [position_x, 5]
             can_ep = True
             return True
     
-    if abs(position_y - target_y) > 1:                                  #Prevent pawn from moving more than one square
+    if abs(position_y - target_y) > 1:                                      #Prevent pawn from moving more than one square
         return False
 
     if turn_initial == "w" and position_y > target_y:                      #Prevent pawn from moving in reverse
@@ -625,7 +652,7 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     elif turn_initial == "b" and position_y < target_y:
         return False
     
-    if position_x-target_x != 0:                                        #Prevent pawn from moving horizontally
+    if position_x-target_x != 0:                                            #Prevent pawn from moving horizontally
         return False
     return True
 
@@ -762,6 +789,7 @@ def isEscapable():
         target_y = coordinate[1]
         turn_initial = "b"
 
+    #Get available adjacent squares around the king 
     if target_x + 1 >= 0 and target_x + 1 <= 7 and target_y >= 0 and target_y <= 7:
         if kingMoveCheck(target_x, target_y, target_x + 1, target_y, turn_initial, False):
             king_square_list.append([target_x + 1, target_y])
@@ -794,6 +822,7 @@ def isEscapable():
         if kingMoveCheck(target_x, target_y, target_x + 1, target_y - 1, turn_initial, False):
             king_square_list.append([target_x + 1, target_y - 1])
 
+    #Evaluate each square
     for coordinate in king_square_list:
         target_x = coordinate[0]
         target_y = coordinate[1]
@@ -946,6 +975,59 @@ def checkForChecks(target_piece, target_square_x, target_square_y, target_initia
         if pawnMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):   
             checking_piece = target_piece
             return True
+        
+def canPromotePawn():
+    global pawn_to_promote
+    if white_turn:
+        for i in range(8):
+            print(piece[7][i][1])
+            if piece[7][i][1] == "P":
+                pawn_to_promote = piece[7][i]
+                return True
+    else:
+        for i in range(8):
+            if piece[0][i][1] == "P":
+                pawn_to_promote = piece[7][i]
+                return True
+    return False
+
+def promotePawn():
+    global white_promotion_number
+    global black_promotion_number
+    
+    coordinate = getPieceCoordinate(pawn_to_promote)
+    target_x = coordinate[0]
+    target_y = coordinate[1]
+    promote_to_piece = input("(R = Rook, N = Knight, B = Bishop, Q = Queen)\nPromote Pawn to: ")
+    if promote_to_piece.upper() == "R":
+        if white_turn:
+            piece[target_y][target_x] = "wR" + str(white_promotion_number)
+            white_promotion_number += 1
+        else:
+            piece[target_y][target_x] = "bR" + str(black_promotion_number)
+            black_promotion_number += 1
+    if promote_to_piece.upper() == "N":
+        if white_turn:
+            piece[target_y][target_x] = "wN" + str(white_promotion_number)
+            white_promotion_number += 1
+        else:
+            piece[target_y][target_x] = "bN" + str(black_promotion_number)
+            black_promotion_number += 1
+    if promote_to_piece.upper() == "B":
+        if white_turn:
+            piece[target_y][target_x] = "wB" + str(white_promotion_number)
+            white_promotion_number += 1
+        else:
+            piece[target_y][target_x] = "bB" + str(black_promotion_number)
+            black_promotion_number += 1
+    if promote_to_piece.upper() == "Q":
+        if white_turn:
+            piece[target_y][target_x] = "wQ" + str(white_promotion_number)
+            white_promotion_number += 1
+        else:
+            piece[target_y][target_x] = "bQ" + str(black_promotion_number)
+            black_promotion_number += 1    
+
 while True:
     update()                    #Runs the Game 
     
