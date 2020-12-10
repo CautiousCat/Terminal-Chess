@@ -216,7 +216,7 @@ def gameUpdate():               #Runs the logic for the game
     last_position = copy.deepcopy(piece)
     
     if checked:
-        if checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker())   :           
+        if checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker()):           
             state = 0
             input("Enter to go back to Main Menu")
 
@@ -734,13 +734,18 @@ def checkForCheckmate(blockable, escapable, can_capture):
             if not escapable:
                 if white_turn:
                     print("Checkmate. Black Wins!")
+                    return True
                 else:
                     print("Checkmate. White Wins!")
+                    return True
         elif not escapable:
             if white_turn:
                 print("Checkmate. Black Wins!")
+                return True
             else:
-                print("Checkmate. White Wins!")      
+                print("Checkmate. White Wins!")
+                return True
+    return False
 
 def isChecked():
     checking_pieces = 0
