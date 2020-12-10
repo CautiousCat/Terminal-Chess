@@ -75,9 +75,31 @@ ep_square = []
 can_ep = False
 ep_capture = False
 
+#Castling
+has_bR1_moved = False
+has_bR2_moved = False
+has_wR1_moved = False
+has_wR2_moved = False
+has_bK1_moved = False
+has_wK1_moved = False
+can_castle_white_short = False
+can_castle_white_long = False
+can_castle_black_short = False
+can_castle_black_long = False
+
 def initialize():
     global piece
     global white_turn
+    global has_bR1_moved
+    global has_bR2_moved
+    global has_wR1_moved
+    global has_wR2_moved
+    global has_bK1_moved
+    global has_wK1_moved
+    global can_castle_white_short
+    global can_castle_white_long
+    global can_castle_black_short
+    global can_castle_black_long
     
     #Initializes standard chess piece layout
     piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
@@ -85,6 +107,18 @@ def initialize():
 
     #Initializes starting turn as white
     white_turn = True
+
+    #Initializes Castling Componenet
+    has_bR1_moved = False
+    has_bR2_moved = False
+    has_wR1_moved = False
+    has_wR2_moved = False
+    has_bK1_moved = False
+    has_wK1_moved = False
+    can_castle_white_short = False
+    can_castle_white_long = False
+    can_castle_black_short = False
+    can_castle_black_long = False
     
 
 def mainMenu():             #The main menu for the Game 
@@ -277,7 +311,15 @@ def recordSquare(x, y, record):
         check_square_list.append([x, y])
 
 def moveCheck(target_piece, target_square):
-
+    global has_bR1_moved
+    global has_bR2_moved
+    global has_wR1_moved
+    global has_wR2_moved
+    global has_bK1_moved
+    global has_wK1_moved
+    global has_wK1_moved
+    global has_bK1_moved
+    
     if white_turn:
         turn_initial = "w"
     else:
@@ -299,6 +341,14 @@ def moveCheck(target_piece, target_square):
             print("Invalid Move for Rook")
             return False
         else:
+            if target_piece == "wR1":
+                has_wR1_moved = True
+            if target_piece == "wR2":
+                has_wR2_moved = True
+            if target_piece == "bR1":
+                has_bR1_moved = True
+            if target_piece == "bR2":
+                has_bR2_moved = True
             return True
         
     #KNIGHT            
@@ -335,6 +385,10 @@ def moveCheck(target_piece, target_square):
             print("Invalid Move for King")
             return False
         else:
+            if white_turn:
+                has_wK1_moved = True
+            else:
+                has_bK1_moved = True
             return True
     #Pawn                                           #Check Move for Pawn
     if target_piece[:2] == turn_initial + "P": 
@@ -505,8 +559,31 @@ def queenMoveCheck(position_x, position_y, target_x, target_y, turn_initial, che
     return True
 
 def kingMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
-
+    global can_castle_white_short
+    global can_castle_white_long
+    global can_castle_black_short
+    global can_castle_black_long
+    
     if abs(position_x - target_x) > 1 or abs(position_y-target_y) > 1:      #If moving more than one square
+        if abs(position_x - target_x) == 2:
+            if white_turn:
+                if position_x - target_x > 0:                  #Castle to the left White
+                    if not has_wR1_moved and rookMoveCheck(0, 0, 3, 0, turn_intial, False, False):
+                        can_castle_white_long = True
+                        return True
+                else:                                   #Castle to the right White
+                    if not has_wR2_moved and rookMoveCheck(7, 0, 5, 0, turn_initial, False, False):                 
+                        can_castle_white_short = True
+                        return True
+            else:
+                if position_x - target_x > 0:                  #Castle to the left Black
+                    if not has_bR1_moved and rookMoveCheck(0, 7, 3, 7, turn_initial, False, False):
+                        can_castle_black_long = True
+                        return True
+                else:                                   #Castle to the right Black
+                    if not has_bR2_moved and rookMoveCheck(7, 7, 5, 7, turn_initial, False, False):                 
+                        canC_cstle_blackShort = True
+                        return True
         return False
     if piece[target_y][target_x][0] == turn_initial:                                  #If encounter ally piece, invalid move
         if not checking_for_blocks:
@@ -553,6 +630,12 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     return True
 
 def updatePieces(target_piece, target_square):
+    global has_bR1_moved
+    global has_bR2_moved
+    global has_wR1_moved
+    global has_wR2_moved
+    global has_bK1_moved
+    global has_wK1_moved
     #Get Coordinates for the piece to move and target square
     coordinate = getPieceCoordinate(target_piece)
     position_x = coordinate[0]
@@ -562,6 +645,32 @@ def updatePieces(target_piece, target_square):
     
     piece[target_y][target_x] = target_piece    #Place piece on the target square
     piece[position_y][position_x] = fs          #Free space on previous square
+
+    #Perform Castle
+    if can_castle_white_short and not has_wR2_moved:
+        piece[0][5] = "wR2"
+        piece[0][7] = fs
+        has_wR2_moved = True
+        has_wK1_moved = True
+        print("Castled")
+    if can_castle_white_long and not has_wR1_moved:
+        piece[0][3] = "wR1"
+        piece[0][0] = fs
+        haswR1Moved = True
+        has_wK1_move = True
+        print("Castled")
+    if can_castle_black_short and not has_bR2_moved:
+        piece[7][5] = "bR2"
+        piece[7][7] = fs
+        has_bR2_moved = True
+        has_bK1_moved = True
+        print("Castled")
+    if can_castle_black_long and not has_bR1_moved:
+        piece[7][3] = "bR1"
+        piece[7][0] = fs
+        has_bR1_moved = True
+        has_bK1_moved = True
+        print("Castled")
 
     if ep_capture:                              #If En Passant Capture
         if white_turn:
