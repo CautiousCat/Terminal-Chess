@@ -151,7 +151,7 @@ def gameUpdate():               #Runs the logic for the game
     check_square_list = []
     checked = isChecked()
     blockable = isBlockable()
-    print(blockable)
+
     printBoard()
 
     while not valid_move:       #Keep Asking for moves until the move is valid
@@ -263,7 +263,7 @@ def squareCoordinateTranslate(square):      #Translates letter to number and ret
 def recordSquare(x, y, record):
     global check_square_list
     if record:
-        check_square_list.append([x, y])  
+        check_square_list.append([x, y])
 
 def moveCheck(target_piece, target_square):
 
@@ -486,7 +486,6 @@ def queenMoveCheck(position_x, position_y, target_x, target_y, turn_initial, che
                 while counter < abs(target_y-position_y)-1:                   #Check squares above      |||||
                     counter += 1
                     recordSquare(position_x, position_y+counter, record)
-                    check_square_list.append([position_y, position_y+counter])
                     if piece[position_y+counter][position_x] != "   " and piece[position_y+counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
                         return False
         elif abs(position_x - target_x) > 0 and abs(position_y - target_y) > 0:
@@ -508,7 +507,7 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     global can_ep
     global ep_capture
     
-    if piece[target_y][target_x][0] == turn_initial and piece[target_y][target_x][1:] != "K1" : #Checks for an ally piece obstructing at the target square. Useful for checks
+    if piece[target_y][target_x][0] == turn_initial: #Checks for an ally piece obstructing at the target square. Useful for checks
         if not checking_for_blocks:                                                             #The target square is obstructed only if we are not checking for squares that can block the enemy king
             return False
         
@@ -531,9 +530,9 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     if abs(position_y - target_y) > 1:                                  #Prevent pawn from moving more than one square
         return False
 
-    if not turn_initial == "w" and position_y-target_y < 0:                      #Prevent pawn from moving in reverse
+    if turn_initial == "w" and position_y > target_y:                      #Prevent pawn from moving in reverse
         return False
-    elif turn_initial == "b" and position_y-target_y > 0:
+    elif turn_initial == "b" and position_y < target_y:
         return False
     
     if position_x-target_x != 0:                                        #Prevent pawn from moving horizontally
@@ -608,7 +607,7 @@ def isBlockable():
 
     #print(checking_pieces)
     if checking_pieces >= 1:
-        print("Can be defended")
+        #print("Can be defended")
         return True
 
     return False
@@ -667,7 +666,30 @@ def eachPieceCheck(target_x, target_y, target_initial, checking_for_blocks, reco
     if pieceCheck(target_initial + "K1"):
         if checkForChecks(target_initial + "K1", target_x, target_y, target_initial, checking_for_blocks, record):
             checking_pieces += 1
-    print(check_square_list)
+    if pieceCheck(target_initial + "P1"):
+        if checkForChecks(target_initial + "P1", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P2"):
+        if checkForChecks(target_initial + "P2", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P3"):
+        if checkForChecks(target_initial + "P3", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P4"):
+        if checkForChecks(target_initial + "P4", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P5"):
+        if checkForChecks(target_initial + "P5", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P6"):
+        if checkForChecks(target_initial + "P6", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P7"):
+        if checkForChecks(target_initial + "P7", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
+    if pieceCheck(target_initial + "P8"):
+        if checkForChecks(target_initial + "P8", target_x, target_y, target_initial, checking_for_blocks, record):
+            checking_pieces += 1
     return checking_pieces
 
 def checkForChecks(target_piece, target_square_x, target_square_y, target_initial, checking_for_blocks, record):       #Checks if a square is available to the specified piece
