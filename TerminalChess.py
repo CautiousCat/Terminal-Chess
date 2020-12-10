@@ -218,6 +218,7 @@ def gameUpdate():               #Runs the logic for the game
     if checked:
         if checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker()):           
             state = 0
+            printBoard()
             input("Enter to go back to Main Menu")
 
     if state != 0:
@@ -725,9 +726,9 @@ def changeTurn():                               #Switches Turns
         white_turn = True
 
 def checkForCheckmate(blockable, escapable, can_capture):
-    print("Can Block: " + str(blockable))
-    print("Can Escape: " + str(escapable))
-    print("Can Capture: " + str(can_capture))
+    #print("Can Block: " + str(blockable))
+    #print("Can Escape: " + str(escapable))
+    #print("Can Capture: " + str(can_capture))
     
     if not blockable:
         if can_capture:
