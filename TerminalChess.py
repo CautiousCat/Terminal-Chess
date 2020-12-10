@@ -428,34 +428,33 @@ def rookMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
         if not checking_for_blocks:                                                             #The target square is obstructed only if we are not checking for squares that can block the enemy king
             return False
 
-    if abs(position_x - target_x) > 0 and abs(position_y - target_y) == 0:                      #If moving Horizontally
-        if position_x > target_x:
-            while counter < abs(position_x-target_x)-1:                   #Check squares to the left   <------
-                counter += 1
-                recordSquare(position_x-counter, position_y, record)
-                if piece[position_y][position_x-counter] != "   " and piece[position_y][position_x-counter][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+    if position_x > target_x:
+        while counter < abs(position_x-target_x)-1:                   #Check squares to the left   <------
+            counter += 1
+            recordSquare(position_x-counter, position_y, record)
+            if piece[position_y][position_x-counter] != "   " and piece[position_y][position_x-counter][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
                     return False
-        elif position_x < target_x:
-            while counter < abs(target_x-position_x)-1:                   #Check squares to the right  ------->
-                counter += 1
-                recordSquare(position_x+counter, position_y, record)
-                if piece[position_y][position_x+counter] != "   " and piece[position_y][position_x+counter][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
-                    return False
-    elif abs(position_x - target_x) == 0 and abs(position_y - target_y) > 0:                    #If moving Vertically
-        if position_y > target_y:                                                                    
-            while counter < abs(position_y-target_y)-1:                   #Check squares below       |||||
-                counter += 1                                                                        #VVVVV
-                recordSquare(position_x, position_y-counter, record)
-                if piece[position_y-counter][position_x] != "   " and piece[position_y-counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
-                    return False
-        elif position_y < target_y:                                                                #^^^^^
-            while counter < abs(target_y-position_y)-1:                   #Check squares above      |||||
-                counter += 1
-                recordSquare(position_x, position_y+counter, record)
-                if piece[position_y+counter][position_y] != "   " and piece[position_y+counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
-                    return False
-    elif abs(position_x - target_x) > 0 and abs(position_y - target_y) > 0:         #If moving diagonally
+    elif position_x < target_x:
+        while counter < abs(target_x-position_x)-1:                   #Check squares to the right  ------->
+            counter += 1
+            recordSquare(position_x+counter, position_y, record)
+            if piece[position_y][position_x+counter] != "   " and piece[position_y][position_x+counter][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+    if position_y > target_y:                                                                    
+        while counter < abs(position_y-target_y)-1:                   #Check squares below       |||||
+            counter += 1                                                                        #VVVVV
+            recordSquare(position_x, position_y-counter, record)
+            if piece[position_y-counter][position_x] != "   " and piece[position_y-counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+    elif position_y < target_y:                                                                #^^^^^
+        while counter < abs(target_y-position_y)-1:                   #Check squares above      |||||
+            counter += 1
+            recordSquare(position_x, position_y+counter, record)
+            if piece[position_y+counter][position_x] != "   " and piece[position_y+counter][position_x][1:] != "K1": #Checks for piece obstructions from ally and enemy pieces before reaching target square. Prevents movement if obstructed
+                return False
+    if abs(position_x - target_x) > 0 and abs(position_y - target_y) > 0:         #If moving diagonally
         return False
+
     return True
 
 def knightMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):                               #KNIGHT KNIGHT                                 
@@ -679,25 +678,21 @@ def updatePieces(target_piece, target_square):
         piece[0][7] = fs
         has_wR2_moved = True
         has_wK1_moved = True
-        print("Castled")
     if can_castle_white_long and not has_wR1_moved:
         piece[0][3] = "wR1"
         piece[0][0] = fs
         haswR1Moved = True
         has_wK1_move = True
-        print("Castled")
     if can_castle_black_short and not has_bR2_moved:
         piece[7][5] = "bR2"
         piece[7][7] = fs
         has_bR2_moved = True
         has_bK1_moved = True
-        print("Castled")
     if can_castle_black_long and not has_bR1_moved:
         piece[7][3] = "bR1"
         piece[7][0] = fs
         has_bR1_moved = True
         has_bK1_moved = True
-        print("Castled")
 
     if ep_capture:                              #If En Passant Capture
         if white_turn:
@@ -717,6 +712,10 @@ def changeTurn():                               #Switches Turns
         white_turn = True
 
 def checkForCheckmate(blockable, escapable, can_capture):
+    print("Can Block: " + str(blockable))
+    print("Can Escape: " + str(escapable))
+    print("Can Capture: " + str(can_capture))
+    
     if not blockable:
         if can_capture:
             if not escapable:
@@ -743,10 +742,9 @@ def isChecked():
         coordinate = getPieceCoordinate("bK1")
         target_x = coordinate[0]
         target_y = coordinate[1]
-
+        
         checking_pieces = eachPieceCheck(target_x, target_y, "w", False, True, False)
 
-    #print(checking_pieces)
     if checking_pieces > 1:
         print("Double Check")
         return True
@@ -831,9 +829,7 @@ def isEscapable():
         else:
             checking_pieces = eachPieceCheck(target_x, target_y, "w", True, False, False)
 
-    #print(checking_pieces)
     if checking_pieces >= 1:
-        #print("Can be defended")
         return False
     elif king_square_list == []:
         return False
@@ -846,13 +842,11 @@ def canCaptureChecker():
     target_x = coordinate[0]
     target_y = coordinate[1]
 
-    #print(target_x, target_y)
     if white_turn:
         checking_pieces = eachPieceCheck(target_x, target_y, "w", False, False, True)
     else:
         checking_pieces = eachPieceCheck(target_x, target_y, "b", False, False, True)
 
-    #print(checking_pieces)
     if checking_pieces >= 1:
         #print("Can capture piece!")
         return True
@@ -861,7 +855,6 @@ def canCaptureChecker():
 
 def eachPieceCheck(target_x, target_y, target_initial, checking_for_blocks, record, allow_king):                         #Used for checking if a square is available to an enemy piece
     checking_pieces = 0
-    
     if pieceCheck(target_initial + "R1"):
         if checkForChecks(target_initial + "R1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
@@ -944,43 +937,46 @@ def checkForChecks(target_piece, target_square_x, target_square_y, target_initia
     coordinate = getPieceCoordinate(target_piece)
     target_piece_x = coordinate[0]
     target_piece_y = coordinate[1]
-        
-    #ROOK
-    if target_piece[:2] == target_initial + "R":        #Checks move for Rook
-        if rookMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
-            checking_piece = target_piece
-            return True
-    #KNIGHT            
-    if target_piece[:2] == target_initial + "N":        #Check move for Knight
-        if knightMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):
-            checking_piece = target_piece
-            return True
-    #BISHOP
-    if target_piece[:2] == target_initial + "B":        #Check move for Bishop
-        if bishopMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
-            checking_piece = target_piece
-            return True
-    #QUEEN                
-    if target_piece[:2] == target_initial + "Q":        #Check move for Queen
-        if queenMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
-            checking_piece = target_piece
-            return True
-    #KING
-    if target_piece[:2] == target_initial + "K" and allow_king:        #Check Move for King
-        if kingMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):
-            checking_piece = target_piece
-            return True        
-    #Pawn                                               #Check Move for Pawn
-    if target_piece[:2] == target_initial + "P": 
-        if pawnMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):   
-            checking_piece = target_piece
-            return True
+
+    #print(target_piece_x, target_piece_y)
+    
+    if not (target_piece_x == target_square_x and target_piece_y == target_square_y):
+        #ROOK
+        if target_piece[:2] == target_initial + "R":        #Checks move for Rook
+            if rookMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
+                checking_piece = target_piece
+                return True
+        #KNIGHT            
+        if target_piece[:2] == target_initial + "N":        #Check move for Knight
+            if knightMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):
+                checking_piece = target_piece
+                return True
+        #BISHOP
+        if target_piece[:2] == target_initial + "B":        #Check move for Bishop
+            if bishopMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
+                checking_piece = target_piece
+                return True
+        #QUEEN                
+        if target_piece[:2] == target_initial + "Q":        #Check move for Queen
+            if queenMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
+                checking_piece = target_piece
+                return True
+        #KING
+        if target_piece[:2] == target_initial + "K" and allow_king:        #Check Move for King
+            if kingMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):
+                checking_piece = target_piece
+                return True        
+        #Pawn                                               #Check Move for Pawn
+        if target_piece[:2] == target_initial + "P": 
+            if pawnMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):   
+                checking_piece = target_piece
+                return True
+    return False
         
 def canPromotePawn():
     global pawn_to_promote
     if white_turn:
         for i in range(8):
-            print(piece[7][i][1])
             if piece[7][i][1] == "P":
                 pawn_to_promote = piece[7][i]
                 return True
