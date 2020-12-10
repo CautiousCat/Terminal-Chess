@@ -72,6 +72,9 @@ white_turn = True               #Initialize Turn
 checking_piece = ""
 check_square_list = []          #Initialize List that records the squares that block the opposing king
 
+#Double Checked
+double_checked = False
+
 #En Passant
 ep_square = []
 can_ep = False
@@ -113,6 +116,7 @@ def initialize():
     global pawn_to_promote
     global white_promotion_number
     global black_promotion_number
+    global double_checked
     
     #Initializes standard chess piece layout
     piece = [[wr1,wn1,wb1,wq,wk,wb2,wn2,wr2], [wp1,wp2,wp3,wp4,wp5,wp6,wp7,wp8], [fs,fs,fs,fs,fs,fs,fs,fs], [fs,fs,fs,fs,fs,fs,fs,fs],      
@@ -137,6 +141,8 @@ def initialize():
     pawn_to_promote = ""
     white_promotion_number = 3
     black_promoton_number = 3
+
+    double_checked = False
     
 
 def mainMenu():             #The main menu for the Game
@@ -155,8 +161,8 @@ def mainMenu():             #The main menu for the Game
     print("          CCCC         HHHH     HHHH    EEEEEEEEEEEEE       SSSSS           SSSSS    ")
     print("                                                                                     ")
     print("How to Play: To move a piece type in this format [(piece initial) + (number) + (file) + (rank)]")
-    print("Example: (Move: p5e4) to move p5 pawn to the e4 square\n")
-    print("Type commands in game to go back to the main menu or save the game")
+    print("Example: (Move: p5e4) to move p5 pawn to the e4 square")
+    print("Type commands in game to go back to the main menu or save the game\n")
     print("Enter '1' to Start a New Game")
     print("Enter '2' to Load last Game")
     print("Enter '3' to view Most Wins")
@@ -214,6 +220,7 @@ def gameUpdate():               #Runs the logic for the game
     global check_square_list
     global checking_piece
     global piece
+
     checking_piece = ""
     valid_move = False
     check_square_list = []
@@ -754,12 +761,29 @@ def changeTurn():                               #Switches Turns
         white_turn = True
 
 def checkForCheckmate(blockable, escapable, can_capture):
+    global double_checked
     #print("Can Block: " + str(blockable))
     #print("Can Escape: " + str(escapable))
     #print("Can Capture: " + str(can_capture))
     
     if not blockable:
-        if can_capture:
+        if not double_checked:
+            if can_capture:
+                if not escapable:
+                    if white_turn:
+                        print("Checkmate. Black Wins!")
+                        return True
+                    else:
+                        print("Checkmate. White Wins!")
+                        return True
+            elif not escapable:
+                if white_turn:
+                    print("Checkmate. Black Wins!")
+                    return True
+                else:
+                    print("Checkmate. White Wins!")
+                    return True
+        else:
             if not escapable:
                 if white_turn:
                     print("Checkmate. Black Wins!")
@@ -767,16 +791,13 @@ def checkForCheckmate(blockable, escapable, can_capture):
                 else:
                     print("Checkmate. White Wins!")
                     return True
-        elif not escapable:
-            if white_turn:
-                print("Checkmate. Black Wins!")
-                return True
-            else:
-                print("Checkmate. White Wins!")
-                return True
+            double_checked = False
+                
     return False
 
 def isChecked():
+    global double_checked
+    
     checking_pieces = 0
     
     if white_turn:
@@ -793,7 +814,8 @@ def isChecked():
         checking_pieces = eachPieceCheck(target_x, target_y, "w", False, True, False)
 
     if checking_pieces > 1:
-        print("Double Check")
+        print("King is Checked!")
+        double_checked = True
         return True
     elif checking_pieces == 1:
         print("King is Checked!")
