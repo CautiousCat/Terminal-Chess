@@ -94,6 +94,9 @@ pawn_to_promote = ""
 white_promotion_number = 3
 black_promotion_number = 3
 
+#Score
+score_list = []
+
 def initialize():
     global piece
     global white_turn
@@ -153,15 +156,17 @@ def mainMenu():             #The main menu for the Game
     print("                                                                                     ")
     print("How to Play: To move a piece type in this format [(piece initial) + (number) + (file) + (rank)]")
     print("Example: (Move: p5e4) to move p5 pawn to the e4 square\n")
-    print("Type '1' to Start a New Game")
-    print("Type '2' to Load last Game")
-    print("Type '3' to view Most Wins")
+    print("Type commands in game to go back to the main menu or save the game")
+    print("Enter '1' to Start a New Game")
+    print("Enter '2' to Load last Game")
+    print("Enter '3' to view Most Wins")
+    print("Enter '4' to clear scores")
     valid_choice = False
     while not valid_choice:
         try:
             choice = int(input("Choice: "))
             valid_choice = True
-            if choice > 3:
+            if choice > 4:
                 print("Invalid choice. Please try again.")
                 valid_choice = False
             
@@ -219,16 +224,26 @@ def gameUpdate():               #Runs the logic for the game
         if checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker()):           
             state = 0
             printBoard()
-            input("Enter to go back to Main Menu")
+            
+            name = input("Enter your name: ")
+            saveScore(name)
 
     if state != 0:
         printBoard()
 
         while not valid_move or checked:       #Keep Asking for moves until the move is valid
             player_input = playerInput()
+            if player_input == "DRAW":
+                state == 0
+            
             if state == 0:
                 break
             
+            if player_input == "SAVE":
+                saveGame()
+                print("Game Saved")
+                continue
+
             target_piece = player_input[0]      #Checks if the move is valid
             target_square = player_input[1]
             valid_move = moveCheck(target_piece, target_square)
@@ -255,9 +270,16 @@ def update():                   #Where all the code is organized
     elif state == 1:            #Start New Game
         gameUpdate()
     elif state == 2:            #Load Last Game
-        print()
+        loadGame()
+        state = 1
     elif state == 3:            #Load and Show players with most wins
-        print()
+        showScore()
+        input("Press enter to continue")
+        state = 0
+    elif state == 4:
+        clearScore()
+        print("Scores successfully cleared")
+        state = 0
 
 def playerInput():
     global state                #Declare global for going back to the main menu
@@ -267,16 +289,22 @@ def playerInput():
 
     while not piece_exists or not square_exists:        #Keep asking for inputs until both the target piece and the target square exist on the board
         if white_turn:
-            print("White's Turn")
+            print("White's Turn                                          Commands: MENU, DRAW, SAVE")
         else:
-            print("Black's Turn")
+            print("Black's Turn                                          Commands: MENU, DRAW, SAVE")
         player_input = input("Move: ")          
         player_input = player_input.upper()
 
         if player_input == "MENU":                      #Return to Main Menu
             state = 0
             return
-        
+
+        if player_input == "SAVE":
+            return "SAVE"
+
+        if player_input == "DRAW":
+            state = 0
+            return "DRAW"
         if white_turn:                                  #Attaches a "w" or "b" character at the beginning of the string depending on whose turn
             player_input = "w" + player_input
         else:
@@ -1053,6 +1081,125 @@ def promotePawn():
             piece[target_y][target_x] = "bQ" + str(black_promotion_number)
             black_promotion_number += 1    
 
+def saveGame():
+    global piece
+    global white_turn
+    
+    with open('last_game.txt', 'w+') as save_data:
+        for list_item_y in piece:
+            for list_item_x in list_item_y:
+                if list_item_x == "   ":
+                    save_data.write('%s\n' % "fs")
+                else:
+                    save_data.write('%s\n' % list_item_x)
+        save_data.write('%s\n' % white_turn)
+
+def loadGame():
+    global piece
+    global white_turn
+    piece = [[],[],[],[],[],[],[],[]]
+    position_y = 0
+    counter = 0
+    with open('last_game.txt', 'r') as save_data:
+        for line in save_data:
+            if counter > 7:
+                counter = 0
+                position_y += 1
+                
+            current_place = line[:-1]
+            if position_y > 7:
+                if current_place == "True":
+                    white_turn =  True
+                else:
+                    white_turn = False
+            elif current_place == "fs":
+                piece[position_y].append("   ")
+            else:
+                piece[position_y].append(current_place)
+            counter += 1
+
+def saveScore(name):
+    loadScore()
+    name_exists = False
+    index = 0
+    if score_list != [[]]:
+        for score in score_list:
+            print(score[0])
+            if score[0] == name:
+                name_exists = True
+                break
+            index += 1
+
+    if name_exists:
+        score_list[index][1] += 1
+    else:
+        score_list.append([name, 1])
+    
+    with open('scores.txt', 'w+') as save_data:
+        for list_item_y in score_list:
+            for list_item_x in list_item_y:
+                save_data.write('%s\n' % list_item_x)
+
+def loadScore():
+    global score_list
+    score_list = [[]]
+    counter = 0
+    position_y = 0
+    try:
+        with open('scores.txt', 'r') as save_data:
+            for line in save_data:
+                if counter > 1:
+                    counter = 0
+                    position_y += 1
+                    score_list.append([])
+
+                if counter == 1:
+                    current_place = line[:-1]
+                    score_list[position_y].append(int(current_place))
+                else:
+                    current_place = line[:-1]
+                    score_list[position_y].append(current_place)
+                counter += 1
+    except:
+        with open('scores.txt', "w+"):
+            print(end="")
+        loadScore()
+    
+def showScore():
+    global score_list
+    loadScore()
+    print(score_list)
+    if score_list != [[]]:
+        for i in range(len(score_list)-1):
+            flag = 0
+
+            for j in range(len(score_list)-1):
+                if score_list[j][1] < score_list[j + 1][1]:
+                    temp = score_list[j]
+                    score_list[j] = score_list[j + 1]
+                    score_list[j + 1] = temp
+                    flag = 1
+                    
+            if flag == 0:
+                break
+
+        counter = 1
+        print("-----------------------------------")
+        print("\n\nPlayers with the most Wins\n")
+        for score in score_list:
+            print("     " + str(counter), ". "+ score[0], "- " + str(score[1]) + " Wins" )
+            counter += 1
+        print("\n\n-----------------------------------")
+    else:
+        print("-----------------------------------")
+        print("\n\nPlayers with the most Wins\n")
+        print("No Scores Recorded" )
+        print("\n\n-----------------------------------")
+
+def clearScore():
+    with open('scores.txt', "w"):
+        print(end="")
+            
 while True:
     update()                    #Runs the Game 
     
