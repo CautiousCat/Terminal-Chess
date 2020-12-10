@@ -61,10 +61,13 @@ bp7 = "bP7"
 bp8 = "bP8"
 fs = "   "
 
-
+#Game System
 piece = []                      #Initializes Board
 state = 0                       #Initialize Game State
 white_turn = True               #Initialize Turn
+
+#Checking
+checking_piece = ""
 check_square_list = []          #Initialize List that records the squares that block the opposing king
 
 #En Passant
@@ -106,6 +109,10 @@ def mainMenu():             #The main menu for the Game
         try:
             choice = int(input("Choice: "))
             valid_choice = True
+            if choice > 3:
+                print("Invalid choice. Please try again.")
+                valid_choice = False
+            
         except:
             print("Invalid choice. Please try again.")
             
@@ -146,11 +153,15 @@ def printBoard():           #Prints the ASCII graphics for the Board and the Pie
     print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
 
 def gameUpdate():               #Runs the logic for the game
-    valid_move = False
     global check_square_list
+    global checking_piece
+    checking_piece = ""
+    valid_move = False
     check_square_list = []
     checked = isChecked()
-    blockable = isBlockable()
+    
+    if checked:
+        checkForCheckmate(isBlockable(), isEscapable(), canCaptureChecker())              
 
     printBoard()
 
@@ -210,13 +221,13 @@ def playerInput():
         #Identify if the target square exists within the board
         target_square = (player_input[3:5])                          #Identifies the target square using the last 2 characters of the string input (e. "e4")
         square_exists = squareCheck(target_square)                  #Identifies if the target square exists within the board using the letter-number coordinate pair
-        target_square = squareCoordinateTranslate(target_square)    #Identifies target square to move using the last 2 letters of the string input as a letter-number coordinate pair of the square (ex. "e4")
 
         if not piece_exists:
             print("The piece does not exist or is no longer in play")
         if not square_exists:
             print("The target square is out of bounds")
-            
+
+    target_square = squareCoordinateTranslate(target_square)    #Identifies target square to move using the last 2 letters of the string input as a letter-number coordinate pair of the square (ex. "e4")            
     return target_piece, target_square                 #Return the piece and target square
     
 def getPieceCoordinate(target_piece):                  #Returns the coordinate of the piece on the board
@@ -233,16 +244,16 @@ def pieceCheck(target_piece):                          #Check if piece exists on
     return False
 
 def squareCheck(square):                    #Check if square is within the board
-    if square[0] != "A" and square[0] != "B" and square[0] != "C" and square[0] != "D" and square[0] != "E" and square[0] != "F" and square[0] != "G" and square[0] != "H":
-        return False
     try:                                    #Prevents errors if user inputs random strings
+        if square[0] != "A" and square[0] != "B" and square[0] != "C" and square[0] != "D" and square[0] != "E" and square[0] != "F" and square[0] != "G" and square[0] != "H":
+            return False                                        
         if int(square[1]) < 1 or int(square[1]) > 8:
             return False
     except:
         return False
     return True
 
-def squareCoordinateTranslate(square):      #Translates letter to number and returns a coordinate pair in string format                        
+def squareCoordinateTranslate(square):      #Translates letter to number and returns a coordinate pair in string format
     if square[0] == "A":
         return "0" + square[1]
     elif square[0] == "B":
@@ -495,9 +506,9 @@ def queenMoveCheck(position_x, position_y, target_x, target_y, turn_initial, che
 
 def kingMoveCheck(position_x, position_y, target_x, target_y, turn_initial, checking_for_blocks):
 
-    if abs(position_x - target_x) > 1 or abs(position_x-target_y) > 1:      #If moving more than one square
+    if abs(position_x - target_x) > 1 or abs(position_y-target_y) > 1:      #If moving more than one square
         return False
-    if piece[targetY][targetX][0] == turn:                                  #If encounter ally piece, invalid move
+    if piece[target_y][target_x][0] == turn_initial:                                  #If encounter ally piece, invalid move
         if not checking_for_blocks:
             return False
     return True
@@ -507,15 +518,17 @@ def pawnMoveCheck(position_x, position_y, target_x, target_y, turn_initial, chec
     global can_ep
     global ep_capture
     
-    if piece[target_y][target_x][0] == turn_initial: #Checks for an ally piece obstructing at the target square. Useful for checks
-        if not checking_for_blocks:                                                             #The target square is obstructed only if we are not checking for squares that can block the enemy king
-            return False
-        
     if abs(position_y-target_y) == 1 and abs(position_x-target_x) == 1:                         #Allows diagonal movement to capture opposing piece
+        if piece[target_y][target_x][0] == turn_initial:                                        #Checks for an ally piece obstructing at the target square. Useful for checks
+            if not checking_for_blocks:                                                         #The target square is obstructed only if we are not checking for squares that can block the enemy king
+                return False
         if (piece[target_y][target_x][0] != turn_initial and piece[target_y][target_x][0] != " ") or (target_x == ep_square[0] and target_y == ep_square[1] and can_ep):     #Enables capture if En Pasant
             ep_capture = True
             return True
 
+    if piece[target_y][target_x] != "   ":                                        #Checks for any piece obstructing at the target square.                                                        
+        return False    
+    
     if turn_initial == "w":                                                      #Allows 2 squares on first move
         if position_y == 1 and target_y == 3:
             ep_square = [position_x, 2]                                 #Prepare En Passant
@@ -567,6 +580,20 @@ def changeTurn():                               #Switches Turns
     else:
         white_turn = True
 
+def checkForCheckmate(blockable, escapable, can_capture):
+    if not blockable:
+        if can_capture:
+            if not escapable:
+                if white_turn:
+                    print("Checkmate. Black Wins!")
+                else:
+                    print("Checkmate. White Wins!")
+        elif not escapable:
+            if white_turn:
+                print("Checkmate. Black Wins!")
+            else:
+                print("Checkmate. White Wins!")      
+
 def isChecked():
     checking_pieces = 0
     
@@ -575,13 +602,13 @@ def isChecked():
         target_x = coordinate[0]
         target_y = coordinate[1]
 
-        checking_pieces = eachPieceCheck(target_x, target_y, "b", False, True)
+        checking_pieces = eachPieceCheck(target_x, target_y, "b", False, True, False)
     else:
         coordinate = getPieceCoordinate("bK1")
         target_x = coordinate[0]
         target_y = coordinate[1]
 
-        checking_pieces = eachPieceCheck(target_x, target_y, "w", False, True)
+        checking_pieces = eachPieceCheck(target_x, target_y, "w", False, True, False)
 
     #print(checking_pieces)
     if checking_pieces > 1:
@@ -597,13 +624,12 @@ def isBlockable():
     checking_pieces = 0
 
     for coordinate in check_square_list:
-        print(coordinate)
         target_x = coordinate[0]
         target_y = coordinate[1]
         if white_turn:
-            checking_pieces = eachPieceCheck(target_x, target_y, "b", False, False)
+            checking_pieces = eachPieceCheck(target_x, target_y, "w", False, False, False)
         else:
-            checking_pieces = eachPieceCheck(target_x, target_y, "w", False, False)
+            checking_pieces = eachPieceCheck(target_x, target_y, "b", False, False, False)
 
     #print(checking_pieces)
     if checking_pieces >= 1:
@@ -612,115 +638,205 @@ def isBlockable():
 
     return False
 
-def eachPieceCheck(target_x, target_y, target_initial, checking_for_blocks, record):                         #Used for checking if a square is available to an enemy piece
+def isEscapable():
+    checking_pieces = 0
+    king_square_list = []
+    
+    if white_turn:
+        coordinate = getPieceCoordinate("wK1")
+        target_x = coordinate[0]
+        target_y = coordinate[1]
+        turn_initial = "w"
+    else:
+        coordinate = getPieceCoordinate("bK1")
+        target_x = coordinate[0]
+        target_y = coordinate[1]
+        turn_initial = "b"
+
+    if target_x + 1 >= 0 and target_x + 1 <= 7 and target_y >= 0 and target_y <= 7:
+        if kingMoveCheck(target_x, target_y, target_x + 1, target_y, turn_initial, False):
+            king_square_list.append([target_x + 1, target_y])
+            
+    if target_x + 1 >= 0 and target_x + 1 <= 7 and target_y + 1 >= 0 and target_y + 1 <= 7:
+        if kingMoveCheck(target_x, target_y, target_x + 1, target_y + 1, turn_initial, False):
+            king_square_list.append([target_x + 1, target_y + 1])
+            
+    if target_x >= 0 and target_x <= 7 and target_y  + 1 >= 0 and target_y + 1 <= 7:
+        if kingMoveCheck(target_x, target_y, target_x, target_y + 1, turn_initial, False):
+            king_square_list.append([target_x, target_y + 1])
+            
+    if target_x - 1 >= 0 and target_x - 1 <= 7 and target_y + 1 >= 0 and target_y + 1 <= 7:
+        if kingMoveCheck(target_x, target_y, target_x - 1, target_y + 1, turn_initial, False):
+            king_square_list.append([target_x - 1, target_y + 1])
+            
+    if target_x - 1 >= 0 and target_x - 1 <= 7 and target_y >= 0 and target_y <= 7:
+        if kingMoveCheck(target_x, target_y, target_x - 1, target_y, turn_initial, False):
+            king_square_list.append([target_x - 1, target_y])
+            
+    if target_x - 1 >= 0 and target_x - 1 <= 7 and target_y - 1 >= 0 and target_y - 1 <= 7:
+        if kingMoveCheck(target_x, target_y, target_x - 1, target_y - 1, turn_initial, False):
+            king_square_list.append([target_x - 1, target_y -1])
+            
+    if target_x >= 0 and target_x <= 7 and target_y - 1 >= 0 and target_y - 1 <= 7:
+        if kingMoveCheck(target_x, target_y, target_x, target_y - 1, turn_initial, False):
+            king_square_list.append([target_x, target_y - 1])
+            
+    if target_x + 1 >= 0 and target_x + 1 <= 7 and target_y - 1 >= 0 and target_y - 1 <= 7:
+        if kingMoveCheck(target_x, target_y, target_x + 1, target_y - 1, turn_initial, False):
+            king_square_list.append([target_x + 1, target_y - 1])
+
+    for coordinate in king_square_list:
+        target_x = coordinate[0]
+        target_y = coordinate[1]
+        if white_turn:
+            checking_pieces = eachPieceCheck(target_x, target_y, "b", True, False, False)
+        else:
+            checking_pieces = eachPieceCheck(target_x, target_y, "w", True, False, False)
+
+    #print(checking_pieces)
+    if checking_pieces >= 1:
+        #print("Can be defended")
+        return False
+    elif king_square_list == []:
+        return False
+    return True
+
+def canCaptureChecker():
+    checking_pieces = 0
+
+    coordinate = getPieceCoordinate(checking_piece)
+    target_x = coordinate[0]
+    target_y = coordinate[1]
+
+    #print(target_x, target_y)
+    if white_turn:
+        checking_pieces = eachPieceCheck(target_x, target_y, "w", False, False, True)
+    else:
+        checking_pieces = eachPieceCheck(target_x, target_y, "b", False, False, True)
+
+    #print(checking_pieces)
+    if checking_pieces >= 1:
+        #print("Can capture piece!")
+        return True
+
+    return False    
+
+def eachPieceCheck(target_x, target_y, target_initial, checking_for_blocks, record, allow_king):                         #Used for checking if a square is available to an enemy piece
     checking_pieces = 0
     
     if pieceCheck(target_initial + "R1"):
-        if checkForChecks(target_initial + "R1", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "R1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "R2"):
-        if checkForChecks(target_initial + "R2", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "R2", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "R3"):
-        if checkForChecks(target_initial + "R3", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "R3", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "R4"):
-        if checkForChecks(target_initial + "R4", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "R4", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "N1"):
-        if checkForChecks(target_initial + "N1", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "N1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "N2"):
-        if checkForChecks(target_initial + "N2", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "N2", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "N3"):
-        if checkForChecks(target_initial + "N3", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "N3", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "N4"):
-        if checkForChecks(target_initial + "N4", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "N4", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "B1"):
-        if checkForChecks(target_initial + "B1", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "B1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "B2"):
-        if checkForChecks(target_initial + "B2", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "B2", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "B3"):
-        if checkForChecks(target_initial + "B3", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "B3", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "B4"):
-        if checkForChecks(target_initial + "B4", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "B4", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "Q1"):
-        if checkForChecks(target_initial + "Q1", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "Q1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "Q2"):
-        if checkForChecks(target_initial + "Q2", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "Q2", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "Q3"):
-        if checkForChecks(target_initial + "Q3", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "Q3", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "Q4"):
-        if checkForChecks(target_initial + "Q4", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "Q4", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "K1"):
-        if checkForChecks(target_initial + "K1", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "K1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P1"):
-        if checkForChecks(target_initial + "P1", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P1", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P2"):
-        if checkForChecks(target_initial + "P2", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P2", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P3"):
-        if checkForChecks(target_initial + "P3", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P3", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P4"):
-        if checkForChecks(target_initial + "P4", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P4", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P5"):
-        if checkForChecks(target_initial + "P5", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P5", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P6"):
-        if checkForChecks(target_initial + "P6", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P6", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P7"):
-        if checkForChecks(target_initial + "P7", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P7", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     if pieceCheck(target_initial + "P8"):
-        if checkForChecks(target_initial + "P8", target_x, target_y, target_initial, checking_for_blocks, record):
+        if checkForChecks(target_initial + "P8", target_x, target_y, target_initial, checking_for_blocks, record, allow_king):
             checking_pieces += 1
     return checking_pieces
 
-def checkForChecks(target_piece, target_square_x, target_square_y, target_initial, checking_for_blocks, record):       #Checks if a square is available to the specified piece
+def checkForChecks(target_piece, target_square_x, target_square_y, target_initial, checking_for_blocks, record, allow_king):       #Checks if a square is available to the specified piece
+    global checking_piece
     coordinate = getPieceCoordinate(target_piece)
     target_piece_x = coordinate[0]
     target_piece_y = coordinate[1]
         
     #ROOK
-    if target_piece[:2] == target_initial + "R":      #Checks move for Rook
-        return rookMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record)
-
+    if target_piece[:2] == target_initial + "R":        #Checks move for Rook
+        if rookMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
+            checking_piece = target_piece
+            return True
     #KNIGHT            
-    if target_piece[:2] == target_initial + "N":      #Check move for Knight
-        return knightMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks)
-
+    if target_piece[:2] == target_initial + "N":        #Check move for Knight
+        if knightMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):
+            checking_piece = target_piece
+            return True
     #BISHOP
-    if target_piece[:2] == target_initial + "B":      #Check move for Bishop
-        return bishopMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record)
-
+    if target_piece[:2] == target_initial + "B":        #Check move for Bishop
+        if bishopMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
+            checking_piece = target_piece
+            return True
     #QUEEN                
-    if target_piece[:2] == target_initial + "Q":      #Check move for Queen
-        return queenMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record) 
-
+    if target_piece[:2] == target_initial + "Q":        #Check move for Queen
+        if queenMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks, record):
+            checking_piece = target_piece
+            return True
     #KING
-    if target_piece[:2] == target_initial + "K":      #Check Move for King
-        return kingMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks)
-        
-    #Pawn                                           #Check Move for Pawn
+    if target_piece[:2] == target_initial + "K" and allow_king:        #Check Move for King
+        if kingMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):
+            checking_piece = target_piece
+            return True        
+    #Pawn                                               #Check Move for Pawn
     if target_piece[:2] == target_initial + "P": 
-        return pawnMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks)   
-
+        if pawnMoveCheck(target_piece_x, target_piece_y, target_square_x, target_square_y, target_initial, checking_for_blocks):   
+            checking_piece = target_piece
+            return True
 while True:
     update()                    #Runs the Game 
     
