@@ -188,32 +188,124 @@ def inGameMenu():
 
 def printBoard():           #Prints the ASCII graphics for the Board and the Pieces
     global piece
-    print("   A     B     C     D     E     F     G     H   ")
-    print(" _____ _____ _____ _____ _____ _____ _____ _____ ")
-    print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
-    print("# "+piece[7][0]+" # "+piece[7][1]+" # "+piece[7][2]+" # "+piece[7][3]+" # "+piece[7][4]+" # "+piece[7][5]+" # "+piece[7][6]+" # "+piece[7][7]+" #  8")
-    print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
-    print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
-    print("# "+piece[6][0]+" # "+piece[6][1]+" # "+piece[6][2]+" # "+piece[6][3]+" # "+piece[6][4]+" # "+piece[6][5]+" # "+piece[6][6]+" # "+piece[6][7]+" #  7")
-    print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
-    print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
-    print("# "+piece[5][0]+" # "+piece[5][1]+" # "+piece[5][2]+" # "+piece[5][3]+" # "+piece[5][4]+" # "+piece[5][5]+" # "+piece[5][6]+" # "+piece[5][7]+" #  6")
-    print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
-    print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
-    print("# "+piece[4][0]+" # "+piece[4][1]+" # "+piece[4][2]+" # "+piece[4][3]+" # "+piece[4][4]+" # "+piece[4][5]+" # "+piece[4][6]+" # "+piece[4][7]+" #  5")
-    print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
-    print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
-    print("# "+piece[3][0]+" # "+piece[3][1]+" # "+piece[3][2]+" # "+piece[3][3]+" # "+piece[3][4]+" # "+piece[3][5]+" # "+piece[3][6]+" # "+piece[3][7]+" #  4")
-    print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
-    print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
-    print("# "+piece[2][0]+" # "+piece[2][1]+" # "+piece[2][2]+" # "+piece[2][3]+" # "+piece[2][4]+" # "+piece[2][5]+" # "+piece[2][6]+" # "+piece[2][7]+" #  3")
-    print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
-    print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
-    print("# "+piece[1][0]+" # "+piece[1][1]+" # "+piece[1][2]+" # "+piece[1][3]+" # "+piece[1][4]+" # "+piece[1][5]+" # "+piece[1][6]+" # "+piece[1][7]+" #  2")
-    print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
-    print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
-    print("# "+piece[0][0]+" # "+piece[0][1]+" # "+piece[0][2]+" # "+piece[0][3]+" # "+piece[0][4]+" # "+piece[0][5]+" # "+piece[0][6]+" # "+piece[0][7]+" #  1")
-    print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
+    #print("   A     B     C     D     E     F     G     H   ")
+    #print(" _____ _____ _____ _____ _____ _____ _____ _____ ")
+    #print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
+    #print("# "+piece[7][0]+" # "+piece[7][1]+" # "+piece[7][2]+" # "+piece[7][3]+" # "+piece[7][4]+" # "+piece[7][5]+" # "+piece[7][6]+" # "+piece[7][7]+" #  8")
+    #print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
+    #print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
+    #print("# "+piece[6][0]+" # "+piece[6][1]+" # "+piece[6][2]+" # "+piece[6][3]+" # "+piece[6][4]+" # "+piece[6][5]+" # "+piece[6][6]+" # "+piece[6][7]+" #  7")
+    #print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
+    #print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
+    #print("# "+piece[5][0]+" # "+piece[5][1]+" # "+piece[5][2]+" # "+piece[5][3]+" # "+piece[5][4]+" # "+piece[5][5]+" # "+piece[5][6]+" # "+piece[5][7]+" #  6")
+    #print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
+    #print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
+    #print("# "+piece[4][0]+" # "+piece[4][1]+" # "+piece[4][2]+" # "+piece[4][3]+" # "+piece[4][4]+" # "+piece[4][5]+" # "+piece[4][6]+" # "+piece[4][7]+" #  5")
+    #print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
+    #print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
+    #print("# "+piece[3][0]+" # "+piece[3][1]+" # "+piece[3][2]+" # "+piece[3][3]+" # "+piece[3][4]+" # "+piece[3][5]+" # "+piece[3][6]+" # "+piece[3][7]+" #  4")
+    #print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
+    #print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
+    #print("# "+piece[2][0]+" # "+piece[2][1]+" # "+piece[2][2]+" # "+piece[2][3]+" # "+piece[2][4]+" # "+piece[2][5]+" # "+piece[2][6]+" # "+piece[2][7]+" #  3")
+    #print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
+    #print("#■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#     #")
+    #print("# "+piece[1][0]+" # "+piece[1][1]+" # "+piece[1][2]+" # "+piece[1][3]+" # "+piece[1][4]+" # "+piece[1][5]+" # "+piece[1][6]+" # "+piece[1][7]+" #  2")
+    #print("#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#")
+    #print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
+    #print("# "+piece[0][0]+" # "+piece[0][1]+" # "+piece[0][2]+" # "+piece[0][3]+" # "+piece[0][4]+" # "+piece[0][5]+" # "+piece[0][6]+" # "+piece[0][7]+" #  1")
+    #print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
+    is_starting_square_white = True
+    for i in range(8):
+        printRank(is_starting_square_white, i)
+        is_starting_square_white = False if is_starting_square_white else True
+        
+def printRank(is_starting_square_white, position_y):
+    is_current_square_white = True if is_starting_square_white else False
+
+    for i in range(5):
+        if not is_starting_square_white:
+            if i == 0:
+                print("#########         #########         #########         #########         ", end = "")
+            else:
+                for j in range(8):
+                    printPieceLine(j, i, piece[7-position_y][j], is_current_square_white)
+                    is_current_square_white = False if is_current_square_white else True
+                
+        elif is_starting_square_white:
+            if i == 0:
+                print("         #########         #########         #########         #########", end="")
+            else:
+                for j in range(8):
+                    printPieceLine(j, i, piece[position_y][j], is_current_square_white)
+                    is_current_square_white = False if is_current_square_white else True
+        print()
+def printPieceLine(position_x, position_y, target_piece, is_current_square_white):
+    if  position_x == 0:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 1:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 2:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 3:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 4:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 5:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 6:
+        printSquare(position_y, is_current_square_white, target_piece)
+    if  position_x == 7:
+        printSquare(position_y, is_current_square_white, target_piece)
+
+def printSquare(position_y, is_current_square_white, target_piece):
+    if target_piece[1] == "R":
+        printRook(position_y, is_current_square_white, target_piece)
+    else:
+        printFreeSpace(position_y, is_current_square_white)
+
+def printRook(position_y, is_current_square_white, target_piece):
+    if position_y == 1:
+        if is_current_square_white:
+            print("  [`'`'] ", end = "")
+        else:
+            print("##[`'`']#", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("   |  |  ", end = "")
+        else:
+            print("###|  |##", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   |  |  ", end = "")
+        else:
+            print("###|  |##", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")
+
+def printFreeSpace(position_y, is_current_square_white):
+    if position_y == 1:
+        if is_current_square_white:
+            print("         ", end = "")
+        else:
+            print("#########", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("         ", end = "")
+        else:
+            print("#########", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("         ", end = "")
+        else:
+            print("#########", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("         ", end = "")
+        else:
+            print("#########", end = "")
 
 def gameUpdate():               #Runs the logic for the game
     global state
