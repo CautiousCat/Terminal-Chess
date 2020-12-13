@@ -236,6 +236,9 @@ def printRank(is_starting_square_white, position_y):
                 for j in range(8):
                     printPieceLine(j, i, piece[7-position_y][j], is_current_square_white)
                     is_current_square_white = False if is_current_square_white else True
+
+                    if j == 7:
+                        printNumber(i, position_y)
                 
         elif is_starting_square_white:
             if i == 0:
@@ -244,6 +247,8 @@ def printRank(is_starting_square_white, position_y):
                 for j in range(8):
                     printPieceLine(j, i, piece[7-position_y][j], is_current_square_white)
                     is_current_square_white = False if is_current_square_white else True
+                    if j == 7:
+                        printNumber(i, position_y)
         print()
 def printPieceLine(position_x, position_y, target_piece, is_current_square_white):
     if  position_x == 0:
@@ -266,30 +271,76 @@ def printPieceLine(position_x, position_y, target_piece, is_current_square_white
 def printSquare(position_y, is_current_square_white, target_piece):
     if target_piece[1] == "R":
         printRook(position_y, is_current_square_white, target_piece)
+    elif target_piece[1] == "N":
+        printKnight(position_y, is_current_square_white, target_piece)
+    elif target_piece[1] == "B":
+        printBishop(position_y, is_current_square_white, target_piece)
+    elif target_piece[1] == "Q":
+        printQueen(position_y, is_current_square_white, target_piece)
+    elif target_piece[1] == "K":
+        printKing(position_y, is_current_square_white, target_piece)
+    elif target_piece[1] == "P":
+        printPawn(position_y, is_current_square_white, target_piece)
     else:
         printFreeSpace(position_y, is_current_square_white)
 
-def printNumber(position_y, ):
-    if position_y == 1:
-        if is_current_square_white:
-            print("  [`'`'] ", end = "")
-        else:
-            print("##[`'`']#", end = "")
-    elif position_y == 2:
-        if is_current_square_white:
-            print("   |  |  ", end = "")
-        else:
-            print("###|  |##", end = "")
-    elif position_y == 3:
-        if is_current_square_white:
-            print("   |  |  ", end = "")
-        else:
-            print("###|  |##", end = "")
-    elif position_y == 4:
-        if is_current_square_white:
-            print("   " + target_piece + "   ", end = "")
-        else:
-            print("## " + target_piece + " ##", end = "")    
+def printNumber(position_y, rank):
+    if rank == 0: #Number 8
+        if position_y == 1:
+            print("  _  ", end = "")
+        elif position_y == 2:
+            print(" (_) ", end = "")
+        elif position_y == 3:
+            print(" (_) ", end = "")
+    elif rank == 1: #Number 7
+        if position_y == 1:
+            print("  __ ", end = "")
+        elif position_y == 2:
+            print("   / ", end = "")
+        elif position_y == 3:
+            print("  /  ", end = "")
+    elif rank == 2: #Number 6
+        if position_y == 1:
+            print("     ", end = "")
+        elif position_y == 2:
+            print("  /  ", end = "")
+        elif position_y == 3:
+            print(" (_) ", end = "")
+    elif rank == 3: #Number 5
+        if position_y == 1:
+            print("  _  ", end = "")
+        elif position_y == 2:
+            print(" |_  ", end = "")
+        elif position_y == 3:
+            print("  _) ", end = "")
+    elif rank == 4: #Number 4
+        if position_y == 1:
+            print("   . ", end = "")
+        elif position_y == 2:
+            print("  /| ", end = "")
+        elif position_y == 3:
+            print(" '-| ", end = "")
+    elif rank == 5: #Number 3
+        if position_y == 1:
+            print("  _  ", end = "")
+        elif position_y == 2:
+            print("  _) ", end = "")
+        elif position_y == 3:
+            print("  _) ", end = "")
+    elif rank == 6: #Number 2
+        if position_y == 1:
+            print("  _  ", end = "")
+        elif position_y == 2:
+            print("   ) ", end = "")
+        elif position_y == 3:
+            print("  /_ ", end = "")
+    elif rank == 7: #Number 1
+        if position_y == 1:
+            print("     ", end = "")
+        elif position_y == 2:
+            print("  /| ", end = "")
+        elif position_y == 3:
+            print("   | ", end = "")
 
 def printRook(position_y, is_current_square_white, target_piece):
     if position_y == 1:
@@ -313,6 +364,115 @@ def printRook(position_y, is_current_square_white, target_piece):
         else:
             print("## " + target_piece + " ##", end = "")
 
+def printKnight(position_y, is_current_square_white, target_piece):
+    if position_y == 1:
+        if is_current_square_white:
+            print("  \`~'/  ", end = "")
+        else:
+            print("##\`~'/##", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("  (o o)  ", end = "")
+        else:
+            print("##(o o)##", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   \ / \ ", end = "")
+        else:
+            print("###\ / \#", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")
+
+def printBishop(position_y, is_current_square_white, target_piece):
+    if position_y == 1:
+        if is_current_square_white:
+            print("  '//\`  ", end = "")
+        else:
+            print("##'//\`##", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("  (o:0)  ", end = "")
+        else:
+            print("##(o:0)##", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   (:)   ", end = "")
+        else:
+            print("###(:)###", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")
+
+def printQueen(position_y, is_current_square_white, target_piece):
+    if position_y == 1:
+        if is_current_square_white:
+            print("  /\*/\  ", end = "")
+        else:
+            print("##/\:/\##", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print(" /(o o)\ ", end = "")
+        else:
+            print("#/(o:o)\#", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   (_)   ", end = "")
+        else:
+            print("###(:)###", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")
+
+def printKing(position_y, is_current_square_white, target_piece):
+    if position_y == 1:
+        if is_current_square_white:
+            print("  |:+:|  ", end = "")
+        else:
+            print("##|`+'|##", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("  (o:o)  ", end = "")
+        else:
+            print("##(o o)##", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   (:)   ", end = "")
+        else:
+            print("###(_)###", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")
+
+def printPawn(position_y, is_current_square_white, target_piece):
+    if position_y == 1:
+        if is_current_square_white:
+            print("   (_)   ", end = "")
+        else:
+            print("###(_)###", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("   | |   ", end = "")
+        else:
+            print("###| |###", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   |_|   ", end = "")
+        else:
+            print("###|_|###", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")
 
 def printFreeSpace(position_y, is_current_square_white):
     if position_y == 1:
