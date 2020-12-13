@@ -214,6 +214,12 @@ def printBoard():           #Prints the ASCII graphics for the Board and the Pie
     #print("#     #■■■■■#     #■■■■■#     #■■■■■#     #■■■■■#")
     #print("# "+piece[0][0]+" # "+piece[0][1]+" # "+piece[0][2]+" # "+piece[0][3]+" # "+piece[0][4]+" # "+piece[0][5]+" # "+piece[0][6]+" # "+piece[0][7]+" #  1")
     #print("#_____#■■■■■#_____#■■■■■#_____#■■■■■#_____#■■■■■#")
+
+    print("              _        _        _        __       __       _")
+    print("    /\       |_)      /        | \      |_       |_       /        |_|")
+    print("   /--\      |_)      \_       |_/      |__      |        \_?      | |")
+    print()
+    
     is_starting_square_white = True
     for i in range(8):
         printRank(is_starting_square_white, i)
@@ -236,7 +242,7 @@ def printRank(is_starting_square_white, position_y):
                 print("         #########         #########         #########         #########", end="")
             else:
                 for j in range(8):
-                    printPieceLine(j, i, piece[position_y][j], is_current_square_white)
+                    printPieceLine(j, i, piece[7-position_y][j], is_current_square_white)
                     is_current_square_white = False if is_current_square_white else True
         print()
 def printPieceLine(position_x, position_y, target_piece, is_current_square_white):
@@ -263,6 +269,28 @@ def printSquare(position_y, is_current_square_white, target_piece):
     else:
         printFreeSpace(position_y, is_current_square_white)
 
+def printNumber(position_y, ):
+    if position_y == 1:
+        if is_current_square_white:
+            print("  [`'`'] ", end = "")
+        else:
+            print("##[`'`']#", end = "")
+    elif position_y == 2:
+        if is_current_square_white:
+            print("   |  |  ", end = "")
+        else:
+            print("###|  |##", end = "")
+    elif position_y == 3:
+        if is_current_square_white:
+            print("   |  |  ", end = "")
+        else:
+            print("###|  |##", end = "")
+    elif position_y == 4:
+        if is_current_square_white:
+            print("   " + target_piece + "   ", end = "")
+        else:
+            print("## " + target_piece + " ##", end = "")    
+
 def printRook(position_y, is_current_square_white, target_piece):
     if position_y == 1:
         if is_current_square_white:
@@ -284,6 +312,7 @@ def printRook(position_y, is_current_square_white, target_piece):
             print("   " + target_piece + "   ", end = "")
         else:
             print("## " + target_piece + " ##", end = "")
+
 
 def printFreeSpace(position_y, is_current_square_white):
     if position_y == 1:
